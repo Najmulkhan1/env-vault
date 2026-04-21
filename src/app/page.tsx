@@ -1,65 +1,105 @@
-import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Lock, ShieldCheck, Zap, Globe, ExternalLink } from "lucide-react";
+import { auth } from "@/lib/auth";
 
-export default function Home() {
+export default async function HomePage() {
+  const session = await auth();
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div className="flex flex-col min-h-screen bg-background">
+      {/* ১. নেভিগেশন বার */}
+      <header className="px-6 lg:px-10 h-16 flex items-center border-b backdrop-blur-sm sticky top-0 z-50 bg-background/80">
+        <Link className="flex items-center justify-center gap-2" href="/">
+          <Lock className="h-6 w-6 text-primary" />
+          <span className="font-bold text-xl tracking-tighter">EnvVault</span>
+        </Link>
+        <nav className="ml-auto flex gap-4 sm:gap-6 items-center">
+          {session ? (
+            <Button asChild variant="default" size="sm">
+              <Link href="/dashboard">Go to Dashboard</Link>
+            </Button>
+          ) : (
+            <>
+              <Link className="text-sm font-medium hover:underline underline-offset-4" href="/auth/login">
+                Login
+              </Link>
+              <Button asChild size="sm">
+                <Link href="/auth/register">Get Started</Link>
+              </Button>
+            </>
+          )}
+        </nav>
+      </header>
+
+      <main className="flex-1">
+        {/* ২. হিরো সেকশন */}
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 px-6">
+          <div className="container mx-auto text-center space-y-6">
+            <div className="inline-block rounded-full bg-muted px-3 py-1 text-sm font-medium">
+              Secure Variable Management for Developers
+            </div>
+            <h1 className="text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
+              Stop Leaking Your <span className="text-primary">.env</span> Files
+            </h1>
+            <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
+              A centralized, end-to-end encrypted platform for developers to store, manage, and share project environment variables securely.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button asChild size="lg" className="px-8">
+                <Link href="/auth/register">Start Your Vault</Link>
+              </Button>
+              <Button variant="outline" size="lg" className="px-8">
+                <ExternalLink className="mr-2 h-5 w-5" /> Star on GitHub
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* ৩. ফিচার সেকশন */}
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted/50 px-6">
+          <div className="container mx-auto grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="flex flex-col items-center text-center space-y-3 p-6 rounded-xl bg-background shadow-sm border">
+              <div className="p-3 bg-primary/10 rounded-full">
+                <ShieldCheck className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold">AES-256-GCM Encryption</h3>
+              <p className="text-muted-foreground text-sm">
+                Variable values are never stored in plaintext — not in the database, nor in logs.
+              </p>
+            </div>
+            <div className="flex flex-col items-center text-center space-y-3 p-6 rounded-xl bg-background shadow-sm border">
+              <div className="p-3 bg-primary/10 rounded-full">
+                <Zap className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold">Zero Friction</h3>
+              <p className="text-muted-foreground text-sm">
+                Add projects, manage variables, and export .env files in just two clicks.
+              </p>
+            </div>
+            <div className="flex flex-col items-center text-center space-y-3 p-6 rounded-xl bg-background shadow-sm border">
+              <div className="p-3 bg-primary/10 rounded-full">
+                <Globe className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold">Accessible Anywhere</h3>
+              <p className="text-muted-foreground text-sm">
+                Fully responsive UI that works from mobile to 4K displays.
+              </p>
+            </div>
+          </div>
+        </section>
       </main>
+
+      {/* ৪. ফুটার সেকশন */}
+      <footer className="w-full py-6 px-6 border-t flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p className="text-xs text-muted-foreground">
+          © 2026 EnvVault. Building trust through transparency and security.
+        </p>
+        <nav className="flex gap-4 sm:gap-6">
+          <Link className="text-xs hover:underline underline-offset-4" href="#">Terms</Link>
+          <Link className="text-xs hover:underline underline-offset-4" href="#">Privacy</Link>
+        </nav>
+      </footer>
     </div>
   );
 }
