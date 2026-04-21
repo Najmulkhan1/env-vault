@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LayoutDashboard, FolderOpen, Settings, Lock } from "lucide-react";
+import { SidebarLogout } from "@/components/shared/Sidebar";
 
 export default function DashboardLayout({
   children,
@@ -28,6 +29,11 @@ export default function DashboardLayout({
             Settings
           </Link>
         </nav>
+
+        {/* সাইডবারের একদম নিচে লগআউট বাটন */}
+        <div className="p-4 border-t">
+          <SidebarLogout />
+        </div>
       </aside>
 
       {/* মেইন কন্টেন্ট এরিয়া */}

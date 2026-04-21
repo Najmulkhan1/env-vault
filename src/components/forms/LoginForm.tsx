@@ -21,18 +21,31 @@ export function LoginForm() {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
+    // ১. সাইন-ইন রিকোয়েস্ট পাঠানো
     const result = await signIn("credentials", {
       email,
       password,
-      redirect: false,
+      redirect: false, // আমরা ম্যানুয়ালি রিডাইরেকশন হ্যান্ডেল করব
     });
 
     if (result?.error) {
       toast.error(result.error);
-    } else {
-      toast.success("Welcome back!");
-      router.push("/dashboard"); // লগইন সফল হলে ড্যাশবোর্ডে পাঠাবে 
+      setLoading(false);
+      return;
     }
+
+    // ২. চেক করা যে সাকসেস ইউআরএল-এ /auth/2fa আছে কিনা
+    // যদি lib/auth.ts থেকে রিডাইরেক্ট ইউআরএল আসে, তার মানে 2FA অন আছে
+    if (result?.url && result.url.includes("/auth/2fa")) {
+      toast.info("Two-Factor Authentication required.");
+      router.push(result.url); // ইউজারকে কোড ইনপুট পেজে পাঠাবে [cite: 97]
+    } else {
+      // ৩. যদি কোনো রিডাইরেক্ট না থাকে, তবে সরাসরি ড্যাশবোর্ডে [cite: 97]
+      toast.success("Welcome back!");
+      router.push("/dashboard");
+      router.refresh();
+    }
+    
     setLoading(false);
   };
 
@@ -53,7 +66,7 @@ export function LoginForm() {
             <Input id="password" name="password" type="password" required />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Signing in..." : "Login"}
+            {loading ? "Checking credentials..." : "Login"}
           </Button>
         </form>
       </CardContent>
