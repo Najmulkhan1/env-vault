@@ -29,7 +29,8 @@ export function RegisterForm() {
       toast.success("Account created! Please login.");
       router.push("/login");
     } else {
-      toast.error("Something went wrong. Try again.");
+      const errorData = await res.json().catch(() => ({}));
+      toast.error(errorData.error || "Something went wrong. Try again.");
     }
     setLoading(false);
   };

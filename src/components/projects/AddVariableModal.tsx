@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 
@@ -31,9 +31,10 @@ export function AddVariableModal({ projectId }: { projectId: string }) {
     if (res.ok) {
       toast.success("Variable added!");
       setOpen(false);
-      window.location.reload(); // পেজ রিফ্রেশ করে নতুন ডাটা দেখাবে
+      window.location.reload();
     } else {
-      toast.error("Failed to add variable.");
+      const errData = await res.json().catch(() => ({}));
+      toast.error(errData.error || "Failed to add variable.");
     }
     setLoading(false);
   };
@@ -46,6 +47,9 @@ export function AddVariableModal({ projectId }: { projectId: string }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add New Variable</DialogTitle>
+          <DialogDescription>
+            Add an encrypted environment variable to this project.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">

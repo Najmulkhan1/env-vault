@@ -9,41 +9,66 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   try {
     const session = await auth();
     const resolvedParams = await params;
-    if (!session || !session.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    const { name, description } = await req.json();
+    // ফ্রন্টএন্ড থেকে নতুন ফিল্ডগুলো রিসিভ করা
+    const { name, description, colorLabel, liveLink, githubLink, tags } = await req.json();
+    
     await dbConnect();
 
-    // শুধুমাত্র প্রজেক্টের মালিকই যেন আপডেট করতে পারে
+    // প্রজেক্টের মালিকানা যাচাই করে আপডেট করা
     const updatedProject = await Project.findOneAndUpdate(
-      { _id: resolvedParams.id, owner: (session.user as any).id },
-      { name, description },
+      { 
+        _id: resolvedParams.id, 
+        owner: (session.user as any).id 
+      },
+      { 
+        name, 
+        description, 
+        colorLabel, 
+        liveLink, 
+        githubLink, 
+        tags // ফ্রন্টএন্ড থেকে আসা অ্যারেটি এখানে সরাসরি আপডেট হবে
+      },
       { new: true }
     );
 
-    if (!updatedProject) return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    if (!updatedProject) {
+      return NextResponse.json({ error: "Project not found or unauthorized" }, { status: 404 });
+    }
 
     return NextResponse.json(updatedProject);
   } catch (error) {
+    console.error("Update Error:", error);
     return NextResponse.json({ error: "Update failed" }, { status: 500 });
   }
 }
 
-// ২. ডিলিট করার API
+// ২. ডিলিট করার API (আগের মতোই থাকবে, জাস্ট চেক করে নিন)
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
     const resolvedParams = await params;
-    if (!session || !session.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     await dbConnect();
     
-    // প্রজেক্ট ডিলিট করা
-    const deletedProject = await Project.findOneAndDelete({ _id: resolvedParams.id, owner: (session.user as any).id });
+    const deletedProject = await Project.findOneAndDelete({ 
+      _id: resolvedParams.id, 
+      owner: (session.user as any).id 
+    });
     
-    if (!deletedProject) return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    if (!deletedProject) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
 
-    // প্রজেক্টের সাথে সংশ্লিষ্ট সব ভেরিয়েবলও ডিলিট করে দেওয়া
+    // প্রজেক্টের সাথে সংশ্লিষ্ট সব ভেরিয়েবলও ডিলিট করা
     await Variable.deleteMany({ projectId: resolvedParams.id });
 
     return NextResponse.json({ message: "Project deleted successfully" });

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import dbConnect from "@/lib/db";
+import mongoose from "mongoose";
 import Project from "@/models/Project";
 import Variable from "@/models/Variable";
 import { encrypt } from "@/lib/encryption";
@@ -13,12 +14,15 @@ export async function POST(
     const session = await auth();
     const resolvedParams = await params;
     if (!session || !session.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const userId = (session.user as any).id as string;
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { key, value, description } = await req.json();
+    if (!key || !value) return NextResponse.json({ error: "Key and value are required" }, { status: 400 });
     await dbConnect();
 
     // প্রজেক্ট এবং তার DEK খুঁজে বের করা
-    const project = await Project.findOne({ _id: resolvedParams.id, owner: (session.user as any).id });
+    const project = await Project.findOne({ _id: resolvedParams.id, owner: new mongoose.Types.ObjectId(userId) });
     if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 });
 
     // এনক্রিপশন সম্পন্ন করা
